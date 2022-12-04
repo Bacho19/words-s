@@ -11,29 +11,36 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Word = void 0;
 const core_1 = require("@mikro-orm/core");
+const type_graphql_1 = require("type-graphql");
 let Word = class Word {
 };
 __decorate([
+    (0, type_graphql_1.Field)(() => type_graphql_1.Int),
     (0, core_1.PrimaryKey)(),
     __metadata("design:type", Number)
 ], Word.prototype, "id", void 0);
 __decorate([
+    (0, type_graphql_1.Field)(() => String),
     (0, core_1.Property)({ unique: true }),
     __metadata("design:type", String)
 ], Word.prototype, "word", void 0);
 __decorate([
-    (0, core_1.Property)(),
+    (0, type_graphql_1.Field)(() => String),
+    (0, core_1.Property)({ type: "text" }),
     __metadata("design:type", String)
 ], Word.prototype, "definition", void 0);
 __decorate([
-    (0, core_1.Property)({ name: "word_image_url", nullable: true }),
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    (0, core_1.Property)({ name: "word_image_url", type: "text", nullable: true }),
     __metadata("design:type", String)
 ], Word.prototype, "wordImageUrl", void 0);
 __decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
     (0, core_1.Property)({ nullable: true }),
     __metadata("design:type", String)
 ], Word.prototype, "translation", void 0);
 Word = __decorate([
+    (0, type_graphql_1.ObjectType)(),
     (0, core_1.Entity)()
 ], Word);
 exports.Word = Word;
