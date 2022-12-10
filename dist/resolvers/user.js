@@ -9,21 +9,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HelloResolver = void 0;
+exports.UserResolver = void 0;
 const type_graphql_1 = require("type-graphql");
-let HelloResolver = class HelloResolver {
-    hello() {
-        return "hello";
-    }
+let UsernameAuthInput = class UsernameAuthInput {
 };
 __decorate([
-    (0, type_graphql_1.Query)(() => String),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], HelloResolver.prototype, "hello", null);
-HelloResolver = __decorate([
+    (0, type_graphql_1.Field)(() => String),
+    __metadata("design:type", String)
+], UsernameAuthInput.prototype, "username", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String),
+    __metadata("design:type", String)
+], UsernameAuthInput.prototype, "password", void 0);
+UsernameAuthInput = __decorate([
+    (0, type_graphql_1.InputType)()
+], UsernameAuthInput);
+let UserResolver = class UserResolver {
+};
+UserResolver = __decorate([
     (0, type_graphql_1.Resolver)()
-], HelloResolver);
-exports.HelloResolver = HelloResolver;
-//# sourceMappingURL=hello.js.map
+], UserResolver);
+exports.UserResolver = UserResolver;
+//# sourceMappingURL=user.js.map

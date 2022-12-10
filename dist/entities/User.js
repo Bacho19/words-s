@@ -9,49 +9,41 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Word = void 0;
+exports.User = void 0;
 const type_graphql_1 = require("type-graphql");
 const typeorm_1 = require("typeorm");
-let Word = class Word extends typeorm_1.BaseEntity {
+let User = class User extends typeorm_1.BaseEntity {
 };
 __decorate([
     (0, type_graphql_1.Field)(() => type_graphql_1.Int),
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Word.prototype, "id", void 0);
+], User.prototype, "id", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
-    (0, typeorm_1.Column)({ unique: true }),
+    (0, typeorm_1.Column)({
+        unique: true,
+    }),
     __metadata("design:type", String)
-], Word.prototype, "word", void 0);
+], User.prototype, "username", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
-    (0, typeorm_1.Column)({ type: "text" }),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Word.prototype, "definition", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(() => String, { nullable: true }),
-    (0, typeorm_1.Column)({ name: "word_image_url", type: "text", nullable: true }),
-    __metadata("design:type", String)
-], Word.prototype, "wordImageUrl", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(() => String, { nullable: true }),
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], Word.prototype, "translation", void 0);
+], User.prototype, "password", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
-], Word.prototype, "createdAt", void 0);
+], User.prototype, "createdAt", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", Date)
-], Word.prototype, "updatedAt", void 0);
-Word = __decorate([
+], User.prototype, "updatedAt", void 0);
+User = __decorate([
     (0, type_graphql_1.ObjectType)(),
     (0, typeorm_1.Entity)()
-], Word);
-exports.Word = Word;
-//# sourceMappingURL=Word.js.map
+], User);
+exports.User = User;
+//# sourceMappingURL=User.js.map

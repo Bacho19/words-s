@@ -16,24 +16,22 @@ exports.WordResolver = void 0;
 const Word_1 = require("../entities/Word");
 const type_graphql_1 = require("type-graphql");
 let WordResolver = class WordResolver {
-    words({ em }) {
-        return em.find(Word_1.Word, {});
+    words() {
+        return Word_1.Word.find();
     }
-    word({ em }, id) {
-        return em.findOne(Word_1.Word, { id });
+    word(id) {
+        return Word_1.Word.findOneBy({ id });
     }
-    async createWord({ em }, wordText, definition, translation, wordImageUrl) {
-        const word = em.create(Word_1.Word, {
+    async createWord(word, definition, translation, wordImageUrl) {
+        return Word_1.Word.create({
+            word,
             definition,
             translation,
-            word: wordText,
             wordImageUrl,
-        });
-        await em.persistAndFlush(word);
-        return word;
+        }).save();
     }
-    async updateWord({ em }, id, wordText, definition, translation, wordImageUrl) {
-        const word = await em.findOne(Word_1.Word, {
+    async updateWord(id, wordText, definition, translation, wordImageUrl) {
+        const word = await Word_1.Word.findOneBy({
             id,
         });
         if (!word) {
@@ -47,68 +45,63 @@ let WordResolver = class WordResolver {
             word.translation = translation;
         if (typeof wordImageUrl !== "undefined")
             word.wordImageUrl = wordImageUrl;
-        await em.persistAndFlush(word);
+        await Word_1.Word.save(word);
         return word;
     }
-    async deleteWord({ em }, id) {
-        const word = await em.findOne(Word_1.Word, {
+    async deleteWord(id) {
+        const word = await Word_1.Word.findOneBy({
             id,
         });
         if (!word) {
             return false;
         }
-        await em.nativeDelete(Word_1.Word, { id });
+        await Word_1.Word.delete({ id });
         return true;
     }
 };
 __decorate([
     (0, type_graphql_1.Query)(() => [Word_1.Word]),
-    __param(0, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WordResolver.prototype, "words", null);
 __decorate([
     (0, type_graphql_1.Query)(() => Word_1.Word, { nullable: true }),
-    __param(0, (0, type_graphql_1.Ctx)()),
-    __param(1, (0, type_graphql_1.Arg)("id")),
+    __param(0, (0, type_graphql_1.Arg)("id")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Number]),
+    __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], WordResolver.prototype, "word", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Word_1.Word),
-    __param(0, (0, type_graphql_1.Ctx)()),
-    __param(1, (0, type_graphql_1.Arg)("word")),
-    __param(2, (0, type_graphql_1.Arg)("definition")),
-    __param(3, (0, type_graphql_1.Arg)("translation", { nullable: true })),
-    __param(4, (0, type_graphql_1.Arg)("wordImageUrl", { nullable: true })),
+    __param(0, (0, type_graphql_1.Arg)("word")),
+    __param(1, (0, type_graphql_1.Arg)("definition")),
+    __param(2, (0, type_graphql_1.Arg)("translation", { nullable: true })),
+    __param(3, (0, type_graphql_1.Arg)("wordImageUrl", { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], WordResolver.prototype, "createWord", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Word_1.Word, { nullable: true }),
-    __param(0, (0, type_graphql_1.Ctx)()),
-    __param(1, (0, type_graphql_1.Arg)("id")),
-    __param(2, (0, type_graphql_1.Arg)("word", { nullable: true })),
-    __param(3, (0, type_graphql_1.Arg)("definition", { nullable: true })),
-    __param(4, (0, type_graphql_1.Arg)("translation", { nullable: true })),
-    __param(5, (0, type_graphql_1.Arg)("wordImageUrl", { nullable: true })),
+    __param(0, (0, type_graphql_1.Arg)("id")),
+    __param(1, (0, type_graphql_1.Arg)("word", { nullable: true })),
+    __param(2, (0, type_graphql_1.Arg)("definition", { nullable: true })),
+    __param(3, (0, type_graphql_1.Arg)("translation", { nullable: true })),
+    __param(4, (0, type_graphql_1.Arg)("wordImageUrl", { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Number, String, String, String, String]),
+    __metadata("design:paramtypes", [Number, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], WordResolver.prototype, "updateWord", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
-    __param(0, (0, type_graphql_1.Ctx)()),
-    __param(1, (0, type_graphql_1.Arg)("id")),
+    __param(0, (0, type_graphql_1.Arg)("id")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Number]),
+    __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], WordResolver.prototype, "deleteWord", null);
 WordResolver = __decorate([
     (0, type_graphql_1.Resolver)()
 ], WordResolver);
 exports.WordResolver = WordResolver;
-//# sourceMappingURL=wordResolver.js.map
+//# sourceMappingURL=word.js.map

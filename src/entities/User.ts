@@ -10,26 +10,20 @@ import {
 
 @ObjectType()
 @Entity()
-export class Word extends BaseEntity {
+export class User extends BaseEntity {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 
   @Field(() => String)
-  @Column({ unique: true })
-  word!: string;
+  @Column({
+    unique: true,
+  })
+  username!: string;
 
   @Field(() => String)
-  @Column({ type: "text" })
-  definition!: string;
-
-  @Field(() => String, { nullable: true })
-  @Column({ name: "word_image_url", type: "text", nullable: true })
-  wordImageUrl: string;
-
-  @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  translation: string;
+  @Column()
+  password!: string;
 
   @Field(() => String)
   @CreateDateColumn()

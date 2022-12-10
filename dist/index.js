@@ -4,24 +4,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
-const core_1 = require("@mikro-orm/core");
-const mikro_orm_config_1 = __importDefault(require("./mikro-orm.config"));
 const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
 const type_graphql_1 = require("type-graphql");
-const wordResolver_1 = require("./resolvers/wordResolver");
+const word_1 = require("./resolvers/word");
+const user_1 = require("./resolvers/user");
+const AppDataSource_1 = require("./AppDataSource");
 const main = async () => {
-    const orm = await core_1.MikroORM.init(mikro_orm_config_1.default);
-    await orm.getMigrator().up();
+    AppDataSource_1.AppDataSource.initialize().then(() => {
+        console.log("db connected");
+    });
     const app = (0, express_1.default)();
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: await (0, type_graphql_1.buildSchema)({
-            resolvers: [wordResolver_1.WordResolver],
+            resolvers: [word_1.WordResolver, user_1.UserResolver],
             validate: false,
         }),
-        context: () => ({
-            em: orm.em.fork(),
-        }),
+        context: () => ({}),
     });
     await apolloServer.start();
     apolloServer.applyMiddleware({ app });
