@@ -21,7 +21,6 @@ export class User extends BaseEntity {
   })
   username!: string;
 
-  @Field(() => String)
   @Column()
   password!: string;
 
