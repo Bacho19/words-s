@@ -5,9 +5,11 @@ import {
   InputType,
   Field,
   ObjectType,
+  Ctx,
 } from "type-graphql";
 import bcrypt from "bcrypt";
 import { User } from "../entities/User";
+import { ApolloContext } from "src/types";
 
 @InputType()
 class UsernameAuthInput {
@@ -89,6 +91,7 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
+    @Ctx() { req }: ApolloContext,
     @Arg("options") { username, password }: UsernameAuthInput
   ): Promise<UserResponse> {
     const user = await User.findOneBy({ username });
@@ -116,6 +119,8 @@ export class UserResolver {
         ],
       };
     }
+
+    req.session.userId = user.id;
 
     return { user };
   }
