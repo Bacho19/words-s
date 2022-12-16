@@ -124,6 +124,13 @@ let UserResolver = class UserResolver {
         req.session.userId = user.id;
         return { user };
     }
+    async me({ req }) {
+        if (!req.session.userId) {
+            return null;
+        }
+        const user = await User_1.User.findOneBy({ id: req.session.userId });
+        return user;
+    }
 };
 __decorate([
     (0, type_graphql_1.Mutation)(() => UserResponse),
@@ -140,6 +147,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, UsernameAuthInput]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "login", null);
+__decorate([
+    (0, type_graphql_1.Query)(() => User_1.User, { nullable: true }),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "me", null);
 UserResolver = __decorate([
     (0, type_graphql_1.Resolver)()
 ], UserResolver);

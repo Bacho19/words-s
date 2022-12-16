@@ -6,6 +6,7 @@ import {
   Field,
   ObjectType,
   Ctx,
+  Query,
 } from "type-graphql";
 import bcrypt from "bcrypt";
 import { User } from "../entities/User";
@@ -123,5 +124,15 @@ export class UserResolver {
     req.session.userId = user.id;
 
     return { user };
+  }
+
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { req }: ApolloContext): Promise<User | null> {
+    if (!req.session.userId) {
+      return null;
+    }
+    const user = await User.findOneBy({ id: req.session.userId });
+
+    return user;
   }
 }

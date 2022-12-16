@@ -10,6 +10,7 @@ import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import { ApolloContext } from "./types";
+import cors from "cors";
 
 declare module "express-session" {
   export interface SessionData {
@@ -28,6 +29,13 @@ const main = async () => {
   const redisClient = new Redis();
 
   app.use(
+    cors({
+      origin: ["http://localhost:3000", "https://studio.apollographql.com"],
+      credentials: true,
+    })
+  );
+
+  app.use(
     session({
       name: "qid",
       store: new RedisStore({
@@ -38,7 +46,7 @@ const main = async () => {
         maxAge: 1000 * 60 * 60 * 24, // 1 day
         httpOnly: true,
         sameSite: "lax",
-        secure: __prod__, // cookie only works in https
+        secure: __prod__, // cookie only works in https on dev
       },
       saveUninitialized: false,
       secret: "sometestsecretkey",
@@ -55,7 +63,13 @@ const main = async () => {
   });
 
   await apolloServer.start();
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({
+    app,
+    cors: {
+      origin: ["http://localhost:3000", "https://studio.apollographql.com"],
+      credentials: true,
+    },
+  });
 
   app.listen(4000, () => {
     console.log("server started");
