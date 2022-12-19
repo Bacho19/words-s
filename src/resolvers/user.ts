@@ -10,7 +10,8 @@ import {
 } from "type-graphql";
 import bcrypt from "bcrypt";
 import { User } from "../entities/User";
-import { ApolloContext } from "src/types";
+import { ApolloContext } from "../types";
+import { COOKIE_NAME } from "../constants";
 
 @InputType()
 class UsernameAuthInput {
@@ -134,5 +135,21 @@ export class UserResolver {
     const user = await User.findOneBy({ id: req.session.userId });
 
     return user;
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { req, res }: ApolloContext): Promise<boolean> {
+    return new Promise((resolve) => {
+      req.session.destroy((err) => {
+        res.clearCookie(COOKIE_NAME);
+        if (err) {
+          console.log(err);
+          resolve(false);
+          return;
+        }
+
+        resolve(true);
+      });
+    });
   }
 }
