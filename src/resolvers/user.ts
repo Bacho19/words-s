@@ -12,9 +12,14 @@ import bcrypt from "bcrypt";
 import { User } from "../entities/User";
 import { ApolloContext } from "../types";
 import { COOKIE_NAME } from "../constants";
+import { sendEmail } from "../utils/sendEmail";
+import { validateRegister } from "../validation/register";
 
 @InputType()
 class UsernameAuthInput {
+  @Field(() => String)
+  email: string;
+
   @Field(() => String)
   username: string;
 
@@ -44,11 +49,24 @@ class UserResponse {
 export class UserResolver {
   @Mutation(() => UserResponse)
   async register(
-    @Arg("options") { username, password }: UsernameAuthInput
+    @Arg("options") { email, username, password }: UsernameAuthInput
   ): Promise<UserResponse> {
-    const candidateUser = await User.findOneBy({ username });
+    const candidateEmail = await User.findOneBy({ email });
 
-    if (candidateUser) {
+    if (candidateEmail) {
+      return {
+        errors: [
+          {
+            field: "username",
+            message: "user with this email already exists",
+          },
+        ],
+      };
+    }
+
+    const candidateUsername = await User.findOneBy({ username });
+
+    if (candidateUsername) {
       return {
         errors: [
           {
@@ -59,31 +77,16 @@ export class UserResolver {
       };
     }
 
-    if (username.length < 3) {
-      return {
-        errors: [
-          {
-            field: "username",
-            message: "length must be greater than 2",
-          },
-        ],
-      };
-    }
+    const errors = validateRegister(email, username, password);
 
-    if (password.length < 3) {
-      return {
-        errors: [
-          {
-            field: "password",
-            message: "length must be greater than 2",
-          },
-        ],
-      };
+    if (errors) {
+      return { errors };
     }
 
     const hashedPass = await bcrypt.hash(password, 5);
 
     const user = await User.create({
+      email,
       username,
       password: hashedPass,
     }).save();
@@ -94,16 +97,24 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Ctx() { req }: ApolloContext,
-    @Arg("options") { username, password }: UsernameAuthInput
+    @Arg("emailOrUsername") emailOrUsername: string,
+    @Arg("password") password: string
   ): Promise<UserResponse> {
-    const user = await User.findOneBy({ username });
+    const user = await User.createQueryBuilder("user")
+      .where("user.email = :email or user.username = :username", {
+        email: emailOrUsername,
+        username: emailOrUsername,
+      })
+      .getOne();
 
     if (!user) {
       return {
         errors: [
           {
             field: "username",
-            message: "invalid username or password",
+            message: emailOrUsername.includes("@")
+              ? "invalid email or password"
+              : "invalid username or password",
           },
         ],
       };
@@ -116,7 +127,9 @@ export class UserResolver {
         errors: [
           {
             field: "username",
-            message: "invalid username or password",
+            message: emailOrUsername.includes("@")
+              ? "invalid email or password"
+              : "invalid username or password",
           },
         ],
       };
@@ -154,9 +167,10 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  forgotPassword(@Arg("email") email: string) {
-    // console.log(email);
-    // nodemailer
+  async forgotPassword(@Arg("email") email: string) {
+    const user = await User.findOneBy({ email });
+
+    sendEmail(email, "");
 
     return true;
   }

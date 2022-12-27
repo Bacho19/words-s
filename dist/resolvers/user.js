@@ -20,8 +20,14 @@ const type_graphql_1 = require("type-graphql");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const User_1 = require("../entities/User");
 const constants_1 = require("../constants");
+const sendEmail_1 = require("../utils/sendEmail");
+const register_1 = require("../validation/register");
 let UsernameAuthInput = class UsernameAuthInput {
 };
+__decorate([
+    (0, type_graphql_1.Field)(() => String),
+    __metadata("design:type", String)
+], UsernameAuthInput.prototype, "email", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
     __metadata("design:type", String)
@@ -60,9 +66,20 @@ UserResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], UserResponse);
 let UserResolver = class UserResolver {
-    async register({ username, password }) {
-        const candidateUser = await User_1.User.findOneBy({ username });
-        if (candidateUser) {
+    async register({ email, username, password }) {
+        const candidateEmail = await User_1.User.findOneBy({ email });
+        if (candidateEmail) {
+            return {
+                errors: [
+                    {
+                        field: "username",
+                        message: "user with this email already exists",
+                    },
+                ],
+            };
+        }
+        const candidateUsername = await User_1.User.findOneBy({ username });
+        if (candidateUsername) {
             return {
                 errors: [
                     {
@@ -72,41 +89,33 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
-        if (username.length < 3) {
-            return {
-                errors: [
-                    {
-                        field: "username",
-                        message: "length must be greater than 2",
-                    },
-                ],
-            };
-        }
-        if (password.length < 3) {
-            return {
-                errors: [
-                    {
-                        field: "password",
-                        message: "length must be greater than 2",
-                    },
-                ],
-            };
+        const errors = (0, register_1.validateRegister)(email, username, password);
+        if (errors) {
+            return { errors };
         }
         const hashedPass = await bcrypt_1.default.hash(password, 5);
         const user = await User_1.User.create({
+            email,
             username,
             password: hashedPass,
         }).save();
         return { user };
     }
-    async login({ req }, { username, password }) {
-        const user = await User_1.User.findOneBy({ username });
+    async login({ req }, emailOrUsername, password) {
+        const user = await User_1.User.createQueryBuilder("user")
+            .where("user.email = :email or user.username = :username", {
+            email: emailOrUsername,
+            username: emailOrUsername,
+        })
+            .getOne();
         if (!user) {
             return {
                 errors: [
                     {
                         field: "username",
-                        message: "invalid username or password",
+                        message: emailOrUsername.includes("@")
+                            ? "invalid email or password"
+                            : "invalid username or password",
                     },
                 ],
             };
@@ -117,7 +126,9 @@ let UserResolver = class UserResolver {
                 errors: [
                     {
                         field: "username",
-                        message: "invalid username or password",
+                        message: emailOrUsername.includes("@")
+                            ? "invalid email or password"
+                            : "invalid username or password",
                     },
                 ],
             };
@@ -145,7 +156,9 @@ let UserResolver = class UserResolver {
             });
         });
     }
-    forgotPassword(email) {
+    async forgotPassword(email) {
+        const user = await User_1.User.findOneBy({ email });
+        (0, sendEmail_1.sendEmail)(email, "");
         return true;
     }
     changePassword() { }
@@ -160,9 +173,10 @@ __decorate([
 __decorate([
     (0, type_graphql_1.Mutation)(() => UserResponse),
     __param(0, (0, type_graphql_1.Ctx)()),
-    __param(1, (0, type_graphql_1.Arg)("options")),
+    __param(1, (0, type_graphql_1.Arg)("emailOrUsername")),
+    __param(2, (0, type_graphql_1.Arg)("password")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, UsernameAuthInput]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "login", null);
 __decorate([
@@ -184,7 +198,7 @@ __decorate([
     __param(0, (0, type_graphql_1.Arg)("email")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "forgotPassword", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
