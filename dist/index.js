@@ -15,10 +15,12 @@ const ioredis_1 = __importDefault(require("ioredis"));
 const express_session_1 = __importDefault(require("express-session"));
 const connect_redis_1 = __importDefault(require("connect-redis"));
 const cors_1 = __importDefault(require("cors"));
+const sendEmail_1 = require("./utils/sendEmail");
 const main = async () => {
     AppDataSource_1.AppDataSource.initialize().then(() => {
         console.log("db connected");
     });
+    (0, sendEmail_1.sendEmail)("bacho@bahcho.com", "<b>hello bro</b>");
     const app = (0, express_1.default)();
     const RedisStore = (0, connect_redis_1.default)(express_session_1.default);
     const redisClient = new ioredis_1.default();

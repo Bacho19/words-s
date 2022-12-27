@@ -11,6 +11,7 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { ApolloContext } from "./types";
 import cors from "cors";
+import { sendEmail } from "./utils/sendEmail";
 
 declare module "express-session" {
   export interface SessionData {
@@ -22,6 +23,8 @@ const main = async () => {
   AppDataSource.initialize().then(() => {
     console.log("db connected");
   });
+
+  sendEmail("bacho@bahcho.com", "<b>hello bro</b>");
 
   const app = express();
 

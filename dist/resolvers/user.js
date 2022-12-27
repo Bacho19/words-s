@@ -145,6 +145,10 @@ let UserResolver = class UserResolver {
             });
         });
     }
+    forgotPassword(email) {
+        return true;
+    }
+    changePassword() { }
 };
 __decorate([
     (0, type_graphql_1.Mutation)(() => UserResponse),
@@ -175,6 +179,19 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "logout", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    __param(0, (0, type_graphql_1.Arg)("email")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], UserResolver.prototype, "forgotPassword", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UserResolver.prototype, "changePassword", null);
 UserResolver = __decorate([
     (0, type_graphql_1.Resolver)()
 ], UserResolver);

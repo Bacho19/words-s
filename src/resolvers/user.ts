@@ -152,4 +152,15 @@ export class UserResolver {
       });
     });
   }
+
+  @Mutation(() => Boolean)
+  forgotPassword(@Arg("email") email: string) {
+    // console.log(email);
+    // nodemailer
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  changePassword() {}
 }
