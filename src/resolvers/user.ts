@@ -9,9 +9,10 @@ import {
   Query,
 } from "type-graphql";
 import bcrypt from "bcrypt";
+import { v4 } from "uuid";
 import { User } from "../entities/User";
 import { ApolloContext } from "../types";
-import { COOKIE_NAME } from "../constants";
+import { CHANGE_PASS_TOKEN, COOKIE_NAME } from "../constants";
 import { sendEmail } from "../utils/sendEmail";
 import { validateRegister } from "../validation/register";
 
@@ -111,7 +112,7 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "username",
+            field: "emailOrUsername",
             message: emailOrUsername.includes("@")
               ? "invalid email or password"
               : "invalid username or password",
@@ -126,7 +127,7 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "username",
+            field: "emailOrUsername",
             message: emailOrUsername.includes("@")
               ? "invalid email or password"
               : "invalid username or password",
@@ -167,10 +168,21 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async forgotPassword(@Arg("email") email: string) {
+  async forgotPassword(
+    @Ctx() { redisClient }: ApolloContext,
+    @Arg("email") email: string
+  ): Promise<boolean> {
     const user = await User.findOneBy({ email });
 
-    sendEmail(email, "");
+    if (!user) {
+      return true;
+    }
+
+    const token = v4();
+
+    sendEmail(email, `http://localhost:3000/change-password/${token}`);
+
+    redisClient.set(CHANGE_PASS_TOKEN, token);
 
     return true;
   }

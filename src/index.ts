@@ -59,7 +59,7 @@ const main = async () => {
       resolvers: [WordResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): ApolloContext => ({ req, res }),
+    context: ({ req, res }): ApolloContext => ({ req, res, redisClient }),
   });
 
   await apolloServer.start();

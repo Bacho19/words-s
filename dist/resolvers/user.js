@@ -18,6 +18,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserResolver = void 0;
 const type_graphql_1 = require("type-graphql");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const uuid_1 = require("uuid");
 const User_1 = require("../entities/User");
 const constants_1 = require("../constants");
 const sendEmail_1 = require("../utils/sendEmail");
@@ -112,7 +113,7 @@ let UserResolver = class UserResolver {
             return {
                 errors: [
                     {
-                        field: "username",
+                        field: "emailOrUsername",
                         message: emailOrUsername.includes("@")
                             ? "invalid email or password"
                             : "invalid username or password",
@@ -125,7 +126,7 @@ let UserResolver = class UserResolver {
             return {
                 errors: [
                     {
-                        field: "username",
+                        field: "emailOrUsername",
                         message: emailOrUsername.includes("@")
                             ? "invalid email or password"
                             : "invalid username or password",
@@ -156,9 +157,14 @@ let UserResolver = class UserResolver {
             });
         });
     }
-    async forgotPassword(email) {
+    async forgotPassword({ redisClient }, email) {
         const user = await User_1.User.findOneBy({ email });
-        (0, sendEmail_1.sendEmail)(email, "");
+        if (!user) {
+            return true;
+        }
+        const token = (0, uuid_1.v4)();
+        (0, sendEmail_1.sendEmail)(email, `http://localhost:3000/change-password/${token}`);
+        redisClient.set(constants_1.CHANGE_PASS_TOKEN, token);
         return true;
     }
     changePassword() { }
@@ -195,9 +201,10 @@ __decorate([
 ], UserResolver.prototype, "logout", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
-    __param(0, (0, type_graphql_1.Arg)("email")),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)("email")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "forgotPassword", null);
 __decorate([

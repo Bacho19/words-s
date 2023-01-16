@@ -47,7 +47,7 @@ const main = async () => {
             resolvers: [word_1.WordResolver, user_1.UserResolver],
             validate: false,
         }),
-        context: ({ req, res }) => ({ req, res }),
+        context: ({ req, res }) => ({ req, res, redisClient }),
     });
     await apolloServer.start();
     apolloServer.applyMiddleware({
