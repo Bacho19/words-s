@@ -1,3 +1,3 @@
 export const __prod__ = process.env.NODE_ENV === "production";
 export const COOKIE_NAME = "qid";
-export const CHANGE_PASS_TOKEN = "changePassToken";
+export const CHANGE_PASS_PREFIX = "changePassToken:";

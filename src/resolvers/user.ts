@@ -12,7 +12,7 @@ import bcrypt from "bcrypt";
 import { v4 } from "uuid";
 import { User } from "../entities/User";
 import { ApolloContext } from "../types";
-import { CHANGE_PASS_TOKEN, COOKIE_NAME } from "../constants";
+import { CHANGE_PASS_PREFIX, COOKIE_NAME } from "../constants";
 import { sendEmail } from "../utils/sendEmail";
 import { validateRegister } from "../validation/register";
 
@@ -180,13 +180,71 @@ export class UserResolver {
 
     const token = v4();
 
-    sendEmail(email, `http://localhost:3000/change-password/${token}`);
+    await redisClient.set(
+      CHANGE_PASS_PREFIX + token,
+      user.id,
+      "EX",
+      1000 * 60 * 60 * 24
+    );
 
-    redisClient.set(CHANGE_PASS_TOKEN, token);
+    await sendEmail(email, `http://localhost:3000/change-password/${token}`);
 
     return true;
   }
 
-  @Mutation(() => Boolean)
-  changePassword() {}
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Ctx() { redisClient }: ApolloContext,
+    @Arg("token") token: string,
+    @Arg("newPassword") newPassword: string
+  ): Promise<UserResponse> {
+    const key = CHANGE_PASS_PREFIX + token;
+    const userId = await redisClient.get(key);
+
+    if (!userId) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "token expired",
+          },
+        ],
+      };
+    }
+
+    const user = await User.findOneBy({
+      id: parseInt(userId),
+    });
+
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "user no longer exists",
+          },
+        ],
+      };
+    }
+
+    if (newPassword.length < 3) {
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "length must be greater than 2",
+          },
+        ],
+      };
+    }
+
+    user.password = await bcrypt.hash(newPassword, 5);
+    await user.save();
+
+    await redisClient.del(key);
+
+    return {
+      user,
+    };
+  }
 }

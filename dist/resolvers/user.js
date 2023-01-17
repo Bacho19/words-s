@@ -163,11 +163,53 @@ let UserResolver = class UserResolver {
             return true;
         }
         const token = (0, uuid_1.v4)();
-        (0, sendEmail_1.sendEmail)(email, `http://localhost:3000/change-password/${token}`);
-        redisClient.set(constants_1.CHANGE_PASS_TOKEN, token);
+        await redisClient.set(constants_1.CHANGE_PASS_PREFIX + token, user.id, "EX", 1000 * 60 * 60 * 24);
+        await (0, sendEmail_1.sendEmail)(email, `http://localhost:3000/change-password/${token}`);
         return true;
     }
-    changePassword() { }
+    async changePassword({ redisClient }, token, newPassword) {
+        const key = constants_1.CHANGE_PASS_PREFIX + token;
+        const userId = await redisClient.get(key);
+        if (!userId) {
+            return {
+                errors: [
+                    {
+                        field: "token",
+                        message: "token expired",
+                    },
+                ],
+            };
+        }
+        const user = await User_1.User.findOneBy({
+            id: parseInt(userId),
+        });
+        if (!user) {
+            return {
+                errors: [
+                    {
+                        field: "token",
+                        message: "user no longer exists",
+                    },
+                ],
+            };
+        }
+        if (newPassword.length < 3) {
+            return {
+                errors: [
+                    {
+                        field: "password",
+                        message: "length must be greater than 2",
+                    },
+                ],
+            };
+        }
+        user.password = await bcrypt_1.default.hash(newPassword, 5);
+        await user.save();
+        await redisClient.del(key);
+        return {
+            user,
+        };
+    }
 };
 __decorate([
     (0, type_graphql_1.Mutation)(() => UserResponse),
@@ -208,10 +250,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "forgotPassword", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(() => Boolean),
+    (0, type_graphql_1.Mutation)(() => UserResponse),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)("token")),
+    __param(2, (0, type_graphql_1.Arg)("newPassword")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "changePassword", null);
 UserResolver = __decorate([
     (0, type_graphql_1.Resolver)()

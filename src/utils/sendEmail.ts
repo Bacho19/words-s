@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 
 export const sendEmail = async (to: string, html: string) => {
-  //   const testAccount = await nodemailer.createTestAccount();
+  const testAccount = await nodemailer.createTestAccount();
 
   // create reusable transporter object using the default SMTP transport
   const transporter = nodemailer.createTransport({
@@ -9,8 +9,8 @@ export const sendEmail = async (to: string, html: string) => {
     port: 587,
     secure: false, // true for 465, false for other ports
     auth: {
-      user: "jr3iupzlcrwplc5o@ethereal.email", // generated ethereal user
-      pass: "zM1VbnBaVpq6AwtG6m", // generated ethereal password
+      user: testAccount.user, // generated ethereal user
+      pass: testAccount.pass, // generated ethereal password
     },
   });
 
