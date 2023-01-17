@@ -187,7 +187,10 @@ export class UserResolver {
       1000 * 60 * 60 * 24
     );
 
-    await sendEmail(email, `http://localhost:3000/change-password/${token}`);
+    await sendEmail(
+      email,
+      `<a href="http://localhost:3000/change-password/${token}" target="_blank">click here</a>`
+    );
 
     return true;
   }

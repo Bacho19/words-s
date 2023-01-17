@@ -164,7 +164,7 @@ let UserResolver = class UserResolver {
         }
         const token = (0, uuid_1.v4)();
         await redisClient.set(constants_1.CHANGE_PASS_PREFIX + token, user.id, "EX", 1000 * 60 * 60 * 24);
-        await (0, sendEmail_1.sendEmail)(email, `http://localhost:3000/change-password/${token}`);
+        await (0, sendEmail_1.sendEmail)(email, `<a href="http://localhost:3000/change-password/${token}" target="_blank">click here</a>`);
         return true;
     }
     async changePassword({ redisClient }, token, newPassword) {
